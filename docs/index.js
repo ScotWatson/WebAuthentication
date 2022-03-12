@@ -63,7 +63,7 @@ const arrAlgorithms = [
 
 window.addEventListener("load", function () {
   const selectAlgorithm = document.createElement("select");
-  document.body.appendChild(pValue);
+  document.body.appendChild(selectAlgorithm);
   for (let algorithm of arrAlgorithms) {
     const option = document.createElement("option");
     option.appendChild(document.createTextNode(algorithm.name));
