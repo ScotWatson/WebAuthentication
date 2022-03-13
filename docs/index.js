@@ -3,6 +3,13 @@
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
+let myServiceWorkerRegistration;
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("sw.js").then((registration) => {
+    myServiceWorkerRegistration = registration;
+  });
+}
+
 const arrAlgorithms = [
   {name: "HSS-LMS", value: -46},
   {name: "SHAKE256", value: -45},
@@ -93,10 +100,14 @@ function registerUser() {
       username: inpUsername.value,
       alg: selectAlgorithm.value,
     };
+    const objRequest = {
+      type: "certificate",
+      value: serialize(objRegistration),
+    };
     const reqRegister = new Request(strAuthURL, {
       method: "GET",
       headers: {},
-      body: serialize(objRegistration),
+      body: JSON.stringify(objRequest),
       mode: "cors",
       credentials: "same-origin",
       cache: "no-store",
@@ -107,22 +118,71 @@ function registerUser() {
   }
   function sendCertificate(response) {
     const optionsFromServer = deserializeOptions(deserialize(response.text()));
-    const credential = await navigator.credentials.create({
+    return navigator.credentials.create({
         publicKey: optionsFromServer,
+    }).then(function (credential) {
+      const objRequest = {
+        type: "certificate",
+        value: serialize(credential),
+      };
+      const reqCertificate = new Request(strAuthURL, {
+        method: "GET",
+        headers: {},
+        body: JSON.stringify(objRequest),
+        mode: "cors",
+        credentials: "same-origin",
+        cache: "no-store",
+        redirect: "follow",
+        referrer: "about:client",
+      }
+      return fetch(reqCertificate);
     });
-    const reqCertificate = new Request(strAuthURL, {
+  }
+  return requestRegistration().then(sendCertificate);
+}
+
+function login() {
+  const strAuthURL = "https://scotwatson.github.io/WebAuthentication/auth";
+  function requestLogin() {
+    const objLogin = {
+      username: inpUsername.value,
+    };
+    const objRequest = {
+      type: "login",
+      value: serialize(objLogin),
+    };
+    const reqLogin = new Request(strAuthURL, {
       method: "GET",
       headers: {},
-      body: serialize(credential),
+      body: JSON.stringify(objRequest),
       mode: "cors",
       credentials: "same-origin",
       cache: "no-store",
       redirect: "follow",
       referrer: "about:client",
     }
-    return fetch(reqCertificate);
+    return fetch(reqLogin);
   }
-  return requestRegistration().then(sendCertificate);
+  function assert() {
+    const objAssert = {
+      username: inpUsername.value,
+    };
+    const objRequest = {
+      type: "assert",
+      value: serialize(objAssert),
+    };
+    const reqAssert = new Request(strAuthURL, {
+      method: "GET",
+      headers: {},
+      body: JSON.stringify(objRequest),
+      mode: "cors",
+      credentials: "same-origin",
+      cache: "no-store",
+      redirect: "follow",
+      referrer: "about:client",
+    }
+    return fetch(reqAssert);
+  }
 }
 
 function serialize(obj) {
