@@ -70,10 +70,88 @@ window.addEventListener("load", function () {
     option.setAttribute("value", algorithm.value);
     selectAlgorithm.appendChild(option);
   }
-  const pValue = document.createElement("p");
-  document.body.appendChild(pValue);
-  setInterval(function () {
-    pValue.innerHTML = selectAlgorithm.value;
-  }, 1000);
+  const pUsername = document.createElement("button");
+  document.body.appendChild(pUsername);
+  pUsername.appendChild(document.createTextNode("Username: "));
+  const inpUsername = document.createElement("button");
+  inpUsername.type = "text";
+  pUsername.appendChild(inpUsername);
+  const pButtons = document.createElement("p");
+  document.body.appendChild(pButtons);
+  const btnRegister = document.createElement("button");
+  btnRegister.innerHTML = "Register";
+  pButtons.appendChild(btnRegister);
+  const btnLogin = document.createElement("button");
+  btnLogin.innerHTML = "Login";
+  pButtons.appendChild(btnRegister);
 });
 
+function registerUser() {
+  const strAuthURL = "https://scotwatson.github.io/WebAuthentication/auth";
+  function requestRegistration() {
+    const objRegistration = {
+      username: inpUsername.value,
+      alg: selectAlgorithm.value,
+    };
+    const reqRegister = new Request(strAuthURL, {
+      method: "GET",
+      headers: {},
+      body: serialize(objRegistration),
+      mode: "cors",
+      credentials: "same-origin",
+      cache: "no-store",
+      redirect: "follow",
+      referrer: "about:client",
+    }
+    return fetch(reqCertificate);
+  }
+  function sendCertificate(response) {
+    const credential = await navigator.credentials.create({
+        publicKey: optionsFromServer
+    });
+    const reqCertificate = new Request(strAuthURL, {
+      method: "GET",
+      headers: {},
+      body: serialize(credential),
+      mode: "cors",
+      credentials: "same-origin",
+      cache: "no-store",
+      redirect: "follow",
+      referrer: "about:client",
+    }
+    return fetch(reqCertificate);
+  }
+  return requestRegistration().then(sendCertificate)
+}
+
+function serialize(obj) {
+  let objFlat = {};
+  for (let key of Object.keys(obj)) {
+    switch (typeof obj[key]) {
+      case "undefined":
+      case "boolean":
+      case "number":
+      case "bigint":
+      case "string":
+        objFlat[key] = obj[key];
+        break;
+      case "symbol":
+        objFlat[key] = "[symbol]";
+        break;
+      case "function":
+        objFlat[key] = "[function]";
+        break;
+      case "object":
+        if (obj[key] === null) {
+          objFlat[key] = null;
+        } else if (obj[key] instanceof ArrayBuffer) {
+          objFlat[key] = Array.from(obj[key]);
+        } else {
+          objFlat[key] = serialize(obj[key]);
+        }
+      default:
+        break;
+    }
+    JSON.stringify(objFlat[key]);
+  }
+}
