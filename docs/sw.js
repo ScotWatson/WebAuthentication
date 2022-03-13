@@ -3,6 +3,8 @@
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
+const savedCertificates = new Map();
+
 function project_file(filename) {
   // NOTE: This path is hardcoded, as the service worker cannot access window.location
   const pathname = "/WebAuthentication/";
@@ -19,38 +21,67 @@ function randomBuffer(length) {
   return retView.buffer;
 }
 
-function respondOptions(request) {
-  request.text().then(createOptions);
-  function createOptions(requestBody) {
-    const objRegistration = JSON.parse(requestBody);
-    const optionsFromServer = {
-      "challenge": randomBuffer(16),
-      "rp": {
-        "name": "Web Authentication Test",
-        "id": "scotwatson.github.io/WebAuthentication"
-      },
-      "user": {
-        "name": objRegistration.username,
-        "displayName": objRegistration.username,
-        "id": randomBuffer(16),
-      },
-      "pubKeyCredParams": [
-        {
-          "type": "public-key",
-          "alg": -7
-        }
-      ],
-      "authenticatorSelection": {
-        authenticatorAttachment: "platform",
-      },
-      "timeout": 60000,
-    };
-    return new Response(serialize(optionsFromServer), {
-      status: 200,
-      statusText: "OK",
-      headers: {},
-    });
+function simulateAuth(request) {
+  function parse(objRequest) {
+    switch (objRequest.type) {
+      case "register":
+        return createOptions(objRequest.value);
+      case "certificate":
+        return saveCertificate(objRequest.value);
+      default:
+        return unknownRequest();
+    }
   }
+  return request.text().then(parse);
+}
+
+function unknownRequest() {
+  return new Response("", {
+    status: 200,
+    statusText: "OK",
+    headers: {},
+  });
+}
+
+function createOptions(objRequest) {
+  const objRegistration = objRequest;
+  const optionsFromServer = {
+    "challenge": randomBuffer(16),
+    "rp": {
+      "name": "Web Authentication Test",
+      "id": "scotwatson.github.io/WebAuthentication"
+    },
+    "user": {
+      "name": objRegistration.username,
+      "displayName": objRegistration.username,
+      "id": randomBuffer(16),
+    },
+    "pubKeyCredParams": [
+      {
+        "type": "public-key",
+        "alg": objRegistration.alg,
+      }
+    ],
+    "authenticatorSelection": {
+      authenticatorAttachment: "platform",
+    },
+    "timeout": 60000,
+  };
+  return new Response(serialize(optionsFromServer), {
+    status: 200,
+    statusText: "OK",
+    headers: {},
+  });
+}
+
+function saveCertificate(requestBody) {
+  const objCertificate = deserializeCertificate(deserialize(requestBody));
+  savedCertificates.set(objCertificate.id, objCertificate);
+  return new Response("", {
+    status: 200,
+    statusText: "OK",
+    headers: {},
+  });
 }
 
 function self_install(e) {
