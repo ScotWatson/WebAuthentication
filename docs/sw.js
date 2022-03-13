@@ -105,8 +105,27 @@ function serialize(obj) {
       default:
         break;
     }
-    JSON.stringify(objFlat[key]);
   }
+  return JSON.stringify(objFlat[key]);
+}
+
+function deserialize(text) {
+  return JSON.parse(obj);
+}
+
+function deserializeArrayBuffer(arr) {
+  return ArrayBuffer.from(arr);
+}
+
+function deserializeCertificate(obj) {
+  let objRet = {};
+  objRet.id = obj.id;
+  objRet.rawId = deserializeArrayBuffer(obj.rawId);
+  objRet.response = Object.create(AuthenticatorAttestationResponse.prototype);
+  objRet.response.clientDataJSON = deserializeArrayBuffer(obj.response.clientDataJSON);
+  objRet.response.attestationObject = deserializeArrayBuffer(obj.response.attestationObject);
+  objRet.type = objRet.type;
+  return objRet;
 }
 
 self.addEventListener("install", self_install);
