@@ -106,8 +106,9 @@ function registerUser() {
     return fetch(reqCertificate);
   }
   function sendCertificate(response) {
+    const optionsFromServer = deserializeOptions(deserialize(response.text()));
     const credential = await navigator.credentials.create({
-        publicKey: optionsFromServer
+        publicKey: optionsFromServer,
     });
     const reqCertificate = new Request(strAuthURL, {
       method: "GET",
@@ -121,7 +122,7 @@ function registerUser() {
     }
     return fetch(reqCertificate);
   }
-  return requestRegistration().then(sendCertificate)
+  return requestRegistration().then(sendCertificate);
 }
 
 function serialize(obj) {
@@ -152,6 +153,28 @@ function serialize(obj) {
       default:
         break;
     }
-    JSON.stringify(objFlat[key]);
   }
+  return JSON.stringify(objFlat[key]);
+}
+
+function deserialize(text) {
+  return JSON.parse(obj);
+}
+
+function deserializeArrayBuffer(arr) {
+  return ArrayBuffer.from(arr);
+}
+
+function deserializeOptions(obj) {
+  let objRet = {};
+  objRet.challenge = deserializeArrayBuffer(obj.challenge);
+  objRet.rp = obj.challenge.rp;
+  objRet.user = {};
+  objRet.user.name = obj.user.name;
+  objRet.user.displayName = obj.user.displayName;
+  objRet.user.id = deserializeArrayBuffer(obj.user.id);
+  objRet.pubKeyCredParams = obj.pubKeyCredParams;
+  objRet.authenticatorSelection = obj.authenticatorSelection;
+  objRet.timeout = obj.timeout;
+  return objRet;
 }
