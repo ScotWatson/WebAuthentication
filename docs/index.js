@@ -80,7 +80,7 @@ window.addEventListener("load", function () {
   const pUsername = document.createElement("p");
   document.body.appendChild(pUsername);
   pUsername.appendChild(document.createTextNode("Username: "));
-  const inpUsername = document.createElement("button");
+  const inpUsername = document.createElement("input");
   inpUsername.type = "text";
   pUsername.appendChild(inpUsername);
   const pButtons = document.createElement("p");
