@@ -160,7 +160,7 @@ function login() {
       cache: "no-store",
       redirect: "follow",
       referrer: "about:client",
-    }
+    });
     return fetch(reqLogin);
   }
   function assert() {
