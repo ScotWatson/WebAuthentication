@@ -77,7 +77,7 @@ window.addEventListener("load", function () {
     option.setAttribute("value", algorithm.value);
     selectAlgorithm.appendChild(option);
   }
-  const pUsername = document.createElement("button");
+  const pUsername = document.createElement("p");
   document.body.appendChild(pUsername);
   pUsername.appendChild(document.createTextNode("Username: "));
   const inpUsername = document.createElement("button");
@@ -116,11 +116,9 @@ function registerUser() {
     });
     return fetch(reqCertificate);
   }
-  function sendCertificate(response) {
+  function makeCertificate(response) {
     const optionsFromServer = deserializeOptions(deserialize(response.text()));
-    return navigator.credentials.create({
-        publicKey: optionsFromServer,
-    }).then(function (credential) {
+    function sendCertificate(credential) {
       const objRequest = {
         type: "certificate",
         value: serialize(credential),
@@ -136,9 +134,12 @@ function registerUser() {
         referrer: "about:client",
       });
       return fetch(reqCertificate);
-    });
+    }
+    return navigator.credentials.create({
+        publicKey: optionsFromServer,
+    }).then(sendCertificate);
   }
-  return requestRegistration().then(sendCertificate);
+  return requestRegistration().then(makeCertificate);
 }
 
 function login() {
