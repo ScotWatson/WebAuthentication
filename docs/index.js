@@ -101,7 +101,7 @@ function registerUser() {
       alg: selectAlgorithm.value,
     };
     const objRequest = {
-      type: "certificate",
+      type: "register",
       value: serialize(objRegistration),
     };
     const reqRegister = new Request(strAuthURL, {
