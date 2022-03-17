@@ -113,7 +113,7 @@ function registerUser() {
       cache: "no-store",
       redirect: "follow",
       referrer: "about:client",
-    }
+    });
     return fetch(reqCertificate);
   }
   function sendCertificate(response) {
@@ -134,7 +134,7 @@ function registerUser() {
         cache: "no-store",
         redirect: "follow",
         referrer: "about:client",
-      }
+      });
       return fetch(reqCertificate);
     });
   }
@@ -180,7 +180,7 @@ function login() {
       cache: "no-store",
       redirect: "follow",
       referrer: "about:client",
-    }
+    });
     return fetch(reqAssert);
   }
 }
