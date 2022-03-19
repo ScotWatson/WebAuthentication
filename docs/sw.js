@@ -3,13 +3,10 @@
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
+const origin = "https://scotwatson.github.io/";
+const pathname = origin + "WebAuthentication/";
+const userIDs = new Map();
 const savedCertificates = new Map();
-
-function project_file(filename) {
-  // NOTE: This path is hardcoded, as the service worker cannot access window.location
-  const pathname = "/WebAuthentication/";
-  return pathname + filename;
-}
 
 // Returns an ArrayBuffer of given length
 // NOT CRYPTOGRAPHICALLY SECURE
@@ -28,6 +25,10 @@ function simulateAuth(request) {
         return createOptions(objRequest.value);
       case "certificate":
         return saveCertificate(objRequest.value);
+      case "login":
+        return login(objRequest.value);
+      case "assert":
+        return assert(objRequest.value);
       default:
         return unknownRequest();
     }
@@ -35,31 +36,55 @@ function simulateAuth(request) {
   return request.text().then(parse);
 }
 
-function unknownRequest() {
-  return new Response("", {
+function ResponseOK(objBody) {
+  return new Response(objBody, {
     status: 200,
     statusText: "OK",
     headers: {},
   });
 }
 
-function createOptions(objRequest) {
-  const objRegistration = objRequest;
+function ResponseClientError(objBody) {
+  return new Response(objBody, {
+    status: 400,
+    statusText: "Bad Request",
+    headers: {},
+  });
+}
+
+function ResponseServerError(objBody) {
+  return new Response(objBody, {
+    status: 500,
+    statusText: "Internal Server Error",
+    headers: {},
+  });
+}
+
+function unknownRequest() {
+  return ResponseClientError("");
+}
+
+function createOptions(objRequestValue) {
+  const objRegistration = objRequestValue;
+  const alg = objRegistration.alg;
+  const username = objRegistration.username;
+  const userID = randomBuffer(16);
+  userIDs.set(username, userID);
   const optionsFromServer = {
     "challenge": randomBuffer(16),
     "rp": {
       "name": "Web Authentication Test",
-      "id": "scotwatson.github.io/WebAuthentication"
+      "id": pathname,
     },
     "user": {
       "name": objRegistration.username,
       "displayName": objRegistration.username,
-      "id": randomBuffer(16),
+      "id": userID,
     },
     "pubKeyCredParams": [
       {
         "type": "public-key",
-        "alg": objRegistration.alg,
+        "alg": alg,
       }
     ],
     "authenticatorSelection": {
@@ -67,23 +92,37 @@ function createOptions(objRequest) {
     },
     "timeout": 60000,
   };
-  return new Response(serialize(optionsFromServer), {
-    status: 200,
-    statusText: "OK",
-    headers: {},
-  });
+  return ResponseOK(serialize(optionsFromServer));
 }
 
-function saveCertificate(requestBody) {
-  const objCertificate = deserializeCertificate(deserialize(requestBody));
+function saveCertificate(objRequestValue) {
+  const objCertificate = deserializeCertificate(deserialize(objRequestValue));
   savedCertificates.set(objCertificate.id, objCertificate);
-  return new Response("", {
-    status: 200,
-    statusText: "OK",
-    headers: {},
-  });
+  return new ResponseOK("");
 }
 
+function sendChallenge(objRequestValue) {
+  const username = objRequestValue.username;
+  const userID = userIDs.get(username);
+  const userCertificate = savedCertificates.get(userID);
+  const optionsFromServer = {
+    "challenge": randomBuffer(16),
+    "timeout": 60000,
+    "rpId": pathname + "/auth",
+    "allowCredentials": [
+      {
+        "type": "public-key",
+        "id": userID,
+      }
+    ]
+  };
+  return new ResponseOK("");
+}
+
+function saveCertificate(objRequestValue) {
+}
+
+  
 function self_install(e) {
   console.log("sw.js: Start Installing");
   function addCaches(cache) {
