@@ -114,34 +114,35 @@ function registerUser() {
       redirect: "follow",
       referrer: "about:client",
     });
+    return fetch(reqRegister);
+  }
+  function getOptionsFromServer(response) {
+    return response.text().then(deserialize).then(deserializeOptions);
+  }
+  function makeCertificate(optionsFromServer) {
+    return navigator.credentials.create({
+      publicKey: optionsFromServer,
+    });
+  }
+  function sendCertificate(credential) {
+    const objRequest = {
+      type: "certificate",
+      value: serialize(credential),
+    };
+    const reqCertificate = new Request(strAuthURL, {
+      method: "GET",
+      headers: {},
+      body: JSON.stringify(objRequest),
+      mode: "cors",
+      credentials: "same-origin",
+      cache: "no-store",
+      redirect: "follow",
+      referrer: "about:client",
+    });
     return fetch(reqCertificate);
   }
-  function makeCertificate(response) {
-    const optionsFromServer = deserializeOptions(deserialize(response.text()));
-    function sendCertificate(credential) {
-      const objRequest = {
-        type: "certificate",
-        value: serialize(credential),
-      };
-      const reqCertificate = new Request(strAuthURL, {
-        method: "GET",
-        headers: {},
-        body: JSON.stringify(objRequest),
-        mode: "cors",
-        credentials: "same-origin",
-        cache: "no-store",
-        redirect: "follow",
-        referrer: "about:client",
-      });
-      return fetch(reqCertificate);
-    }
-    return navigator.credentials.create({
-        publicKey: optionsFromServer,
-    }).then(sendCertificate);
-  }
-  return requestRegistration().then(makeCertificate);
+  return requestRegistration().then(getOptionsFromServer).then(makeCertificate).then(sendCertificate);
 }
-
 function login() {
   const strAuthURL = "https://scotwatson.github.io/WebAuthentication/auth";
   function requestLogin() {
@@ -164,13 +165,18 @@ function login() {
     });
     return fetch(reqLogin);
   }
-  function assert() {
-    const objAssert = {
-      username: inpUsername.value,
-    };
+  function getChallengeFromServer(response) {
+    return response.text().then(deserialize).then(deserializeOptions);
+  }
+  function makeAssertion(optionsFromServer) {
+    return navigator.credentials.get({
+      publicKey: optionsFromServer,
+    });
+  }
+  function sendAssertion(assertion) {
     const objRequest = {
       type: "assert",
-      value: serialize(objAssert),
+      value: serialize(assertion),
     };
     const reqAssert = new Request(strAuthURL, {
       method: "GET",
@@ -184,6 +190,7 @@ function login() {
     });
     return fetch(reqAssert);
   }
+  return requestLogin().then(getChallengeFromServer).then(makeAssertion).then(sendAssertion);
 }
 
 function serialize(obj) {
