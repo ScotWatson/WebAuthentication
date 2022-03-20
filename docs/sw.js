@@ -26,9 +26,9 @@ function simulateAuth(request) {
       case "certificate":
         return saveCertificate(objRequest.value);
       case "login":
-        return login(objRequest.value);
+        return sendChallenge(objRequest.value);
       case "assert":
-        return assert(objRequest.value);
+        return testAssertion(objRequest.value);
       default:
         return unknownRequest();
     }
@@ -119,9 +119,38 @@ function sendChallenge(objRequestValue) {
   return new ResponseOK("");
 }
 
-function saveCertificate(objRequestValue) {
+function testAssertion(objRequestValue) {
+  function getAssertionFromClient() {
+    return deserializeAssertion(deserialize(objRequestValue));
+  }
+  function getCredential(options) {
+    return navigator.credentials.get({
+      publicKey: options,
+    });
+  }
+  function parseCredential(objCredential) {
+    const response = objCredential.response;
+    const clientExtensionResults = objCredential.getClientExtensionResults();
+    const cData = response.clientDataJSON;
+    const authData = response.authenticatorData;
+    const sig = response.signature;
+    const encoder = new TextEncoder();
+    const JSONtext = encoder.encode(cData);
+    const C = JSON.parse(JSONtext);
+    if (C.type !== "webauthn.get") {
+      throw new Error("Invalid Type");
+    }
+    const myBase64Decoder = new base64Decoder();
+    if (C.challenge !== myBase64Decoder.decode(options.challenge)) {
+      throw new Error("Invalid Challenge");
+    }
+    if (C.origin !== origin) {
+      throw new Error("Invalid Origin");
+    }
+    authData.rpIdHash
+  }
+  return getAssertionFromClient().then(getCredential).then(parseCredential);
 }
-
   
 function self_install(e) {
   console.log("sw.js: Start Installing");
@@ -194,7 +223,23 @@ function deserializeCertificate(obj) {
   objRet.response = Object.create(AuthenticatorAttestationResponse.prototype);
   objRet.response.clientDataJSON = deserializeArrayBuffer(obj.response.clientDataJSON);
   objRet.response.attestationObject = deserializeArrayBuffer(obj.response.attestationObject);
-  objRet.type = objRet.type;
+  objRet.type = obj.type;
+  return objRet;
+}
+
+function deserializeAssertion(obj) {
+  let objRet = Object.create(PublicKeyCredential.prototype);
+  objRet.id = obj.id;
+  objRet.rawId = deserializeArrayBuffer(obj.rawId);
+  objRet.response = Object.create(AuthenticatorAttestationResponse.prototype);
+  objRet.response.authenticatorData = deserializeArrayBuffer(obj.response.authenticatorData);
+  objRet.response.clientDataJSON = deserializeArrayBuffer(obj.response.clientDataJSON);
+  objRet.response.signature = deserializeArrayBuffer(obj.response.signature);
+  objRet.response.userHandle = deserializeArrayBuffer(obj.response.userHandle);
+  objRet.type = obj.type;
+  if (obj.allowCredentials) {
+    objRet.allowCredentials = obj.allowCredentials;
+  }
   return objRet;
 }
 
