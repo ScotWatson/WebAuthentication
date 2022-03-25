@@ -3,6 +3,8 @@
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
+self.importScripts("https://scotwatson.github.io/WebInterface/window_extensions.js");
+
 const origin = "https://scotwatson.github.io/";
 const pathname = origin + "WebAuthentication/";
 const userIDs = new Map();
@@ -133,6 +135,7 @@ function testAssertion(objRequestValue) {
     const clientExtensionResults = objCredential.getClientExtensionResults();
     const cData = response.clientDataJSON;
     const authData = response.authenticatorData;
+    const viewAuthData = new Uint8Array(authData);
     const sig = response.signature;
     const encoder = new TextEncoder();
     const JSONtext = encoder.encode(cData);
@@ -140,14 +143,28 @@ function testAssertion(objRequestValue) {
     if (C.type !== "webauthn.get") {
       throw new Error("Invalid Type");
     }
-    const myBase64Decoder = new base64Decoder();
+    const myBase64Decoder = new wifBase64Decoder();
     if (C.challenge !== myBase64Decoder.decode(options.challenge)) {
       throw new Error("Invalid Challenge");
     }
     if (C.origin !== origin) {
       throw new Error("Invalid Origin");
     }
-    authData.rpIdHash
+    const promiseRpIdHash = self.crypto.subtle.digest("sha-256", pathname).then(function (hash) {
+      const viewHash = new Uint8Array(hash);
+      for (let i = 0; i < 32; ++i) {
+        if (viewHash[i] !== viewAuthData[i]) {
+          return false;
+        }
+      }
+      return true;
+    });
+    const boolUP = viewAuthData[32] & 0x01;
+    const boolUV = viewAuthData[32] & 0x04;
+    const boolAT = viewAuthData[32] & 0x40;
+    const boolED = viewAuthData[32] & 0x80;
+    const promiseCDataHash = self.crypto.subtle.digest("sha-256", cData);
+    credentialPublicKey
   }
   return getAssertionFromClient().then(getCredential).then(parseCredential);
 }
