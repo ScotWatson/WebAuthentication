@@ -114,7 +114,7 @@ function registerUser() {
       value: serialize(objRegistration),
     };
     const reqRegister = new Request(strAuthURL, {
-      method: "GET",
+      method: "POST",
       headers: {},
       body: JSON.stringify(objRequest),
       mode: "cors",
