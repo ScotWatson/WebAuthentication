@@ -4,9 +4,19 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 */
 
 let myServiceWorkerRegistration;
+let myServiceWorker;
+
 if ("serviceWorker" in navigator) {
-  navigator.serviceWorker.register("sw.js").then((registration) => {
+  navigator.serviceWorker.register("sw.js", {
+    scope: "./WebAuthentication",
+    type: "classic",
+    updateViaCache: "none",
+  }).then((registration) => {
     myServiceWorkerRegistration = registration;
+    myServiceWorker = myServiceWorkerRegistration.active;
+    myServiceWorker.addEventListener("message", function (evt) {
+      console.log("sw.js: " + evt.data);
+    });
   });
 }
 
