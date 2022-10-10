@@ -72,8 +72,11 @@ const asyncLoad = new Promise(function (resolve, reject) {
   window.addEventListener("load", resolve);
 });
 
+let selectAlgorithm;
+let inpUsername;
+
 asyncLoad.then(function () {
-  const selectAlgorithm = document.createElement("select");
+  selectAlgorithm = document.createElement("select");
   document.body.appendChild(selectAlgorithm);
   for (let algorithm of arrAlgorithms) {
     const option = document.createElement("option");
@@ -84,7 +87,7 @@ asyncLoad.then(function () {
   const pUsername = document.createElement("p");
   document.body.appendChild(pUsername);
   pUsername.appendChild(document.createTextNode("Username: "));
-  const inpUsername = document.createElement("input");
+  inpUsername = document.createElement("input");
   inpUsername.type = "text";
   pUsername.appendChild(inpUsername);
   const pButtons = document.createElement("p");
