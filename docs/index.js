@@ -236,7 +236,7 @@ function serialize(obj) {
 }
 
 function deserialize(text) {
-  return JSON.parse(obj);
+  return JSON.parse(text);
 }
 
 function deserializeArrayBuffer(arr) {
