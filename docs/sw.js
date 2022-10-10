@@ -182,6 +182,7 @@ function self_install(e) {
 function self_fetch(e) {
   console.log("sw.js: Start Handling Fetch");
   function getResponse() {
+    console.log(e.request.url);
     switch (e.request.url) {
       case "/auth":
         return simulateAuth(e.request);
@@ -222,11 +223,11 @@ function serialize(obj) {
         break;
     }
   }
-  return JSON.stringify(objFlat[key]);
+  return JSON.stringify(objFlat);
 }
 
 function deserialize(text) {
-  return JSON.parse(obj);
+  return JSON.parse(text);
 }
 
 function deserializeArrayBuffer(arr) {
