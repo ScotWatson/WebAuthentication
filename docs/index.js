@@ -232,7 +232,7 @@ function serialize(obj) {
         break;
     }
   }
-  return JSON.stringify(objFlat[key]);
+  return JSON.stringify(objFlat);
 }
 
 function deserialize(text) {
