@@ -180,9 +180,9 @@ function self_install(e) {
 }
 
 function self_fetch(e) {
-  console.log("sw.js: Start Handling Fetch");
+  self.postMessage("sw.js: Start Handling Fetch");
   function getResponse() {
-    console.log(e.request.url);
+    self.postMessage(e.request.url);
     switch (e.request.url) {
       case "/auth":
         return simulateAuth(e.request);
@@ -191,7 +191,7 @@ function self_fetch(e) {
     }
   }
   e.respondWith(getResponse);
-  console.log("sw.js: End Handling Fetch");
+  self.postMessage("sw.js: End Handling Fetch");
 }
 
 function serialize(obj) {
