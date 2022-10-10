@@ -184,7 +184,7 @@ function self_fetch(e) {
   function getResponse() {
     switch (e.request.url) {
       case "/auth":
-        return ;
+        return simulateAuth(e.request);
       default:
         return fetch(e.request);
     }
