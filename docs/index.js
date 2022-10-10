@@ -68,7 +68,11 @@ const arrAlgorithms = [
   {name: "AES-CCM-64-128-256", value: 33},
   ];
 
-window.addEventListener("load", function () {
+const asyncLoad = new Promise(function (resolve, reject) {
+  window.addEventListener("load", resolve);
+});
+
+asyncLoad.then(function () {
   const selectAlgorithm = document.createElement("select");
   document.body.appendChild(selectAlgorithm);
   for (let algorithm of arrAlgorithms) {
@@ -87,10 +91,12 @@ window.addEventListener("load", function () {
   document.body.appendChild(pButtons);
   const btnRegister = document.createElement("button");
   btnRegister.innerHTML = "Register";
+  btnRegister.addEventListener("click", registerUser);
   pButtons.appendChild(btnRegister);
   const btnLogin = document.createElement("button");
   btnLogin.innerHTML = "Login";
-  pButtons.appendChild(btnRegister);
+  btnLogin.addEventListener("click", login);
+  pButtons.appendChild(btnLogin);
 });
 
 function registerUser() {
@@ -143,6 +149,7 @@ function registerUser() {
   }
   return requestRegistration().then(getOptionsFromServer).then(makeCertificate).then(sendCertificate);
 }
+
 function login() {
   const strAuthURL = "https://scotwatson.github.io/WebAuthentication/auth";
   function requestLogin() {
