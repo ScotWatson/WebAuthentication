@@ -8,7 +8,7 @@ let myServiceWorker;
 
 if ("serviceWorker" in navigator) {
   navigator.serviceWorker.register("sw.js", {
-    scope: "./WebAuthentication",
+    scope: "./",
     type: "classic",
     updateViaCache: "none",
   }).then((registration) => {
