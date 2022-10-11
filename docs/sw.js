@@ -23,7 +23,8 @@ function randomBuffer(length) {
 }
 
 function simulateAuth(request) {
-  function parse(objRequest) {
+  function parse(text) {
+    const objRequest = JSON.parse(text);
     switch (objRequest.type) {
       case "register":
         return createOptions(objRequest.value);
