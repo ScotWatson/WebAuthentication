@@ -12,14 +12,6 @@ const savedCertificates = new Map();
 
 let myClient = null;
 
-self.clients.matchAll().then(function (clientList) {
-  for (const client of clientList) {
-    if (client.url === "index.html") {
-      myClient = client;
-    }
-  }
-});
-
 // Returns an ArrayBuffer of given length
 // NOT CRYPTOGRAPHICALLY SECURE
 function randomBuffer(length) {
@@ -181,6 +173,14 @@ function testAssertion(objRequestValue) {
   
 function self_install(e) {
   console.log("(sw.js): Start Installing");
+  self.clients.matchAll().then(function (clientList) {
+    console.log(clientList);
+    for (const client of clientList) {
+      if (client.url === "index.html") {
+        myClient = client;
+      }
+    }
+  });
   function addCaches(cache) {
     console.log("(sw.js): Start Adding Caches");
     console.log("(sw.js): End Adding Caches");
