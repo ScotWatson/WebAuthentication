@@ -270,7 +270,7 @@ function deserializeArrayBuffer(arr) {
 function deserializeOptions(obj) {
   let objRet = {};
   objRet.challenge = deserializeArrayBuffer(obj.challenge);
-  objRet.rp = obj.challenge.rp;
+  objRet.rp = obj.rp;
   objRet.user = {};
   objRet.user.name = obj.user.name;
   objRet.user.displayName = obj.user.displayName;
