@@ -226,7 +226,7 @@ function login() {
 
 function serialize(obj) {
   function reduce(obj) {
-    if Array.isArray(obj) {
+    if (Array.isArray(obj)) {
       return obj;
     }
     switch (typeof obj) {
