@@ -80,7 +80,7 @@ function createOptions(objRequestValue) {
     "challenge": randomBuffer(16),
     "rp": {
       "name": "Web Authentication Test",
-      "id": thisURL.hostname + thisURL.pathname,
+      "id": thisURL.hostname,
     },
     "user": {
       "name": objRegistration.username,
