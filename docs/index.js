@@ -139,14 +139,15 @@ async function registerUser() {
   }
   async function getOptionsFromServer(response) {
     const text = await response.text();
-    console.log(text);
     const flatObj = await deserialize(text);
     return await deserializeOptions(flatObj);
   }
   async function makeCertificate(optionsFromServer) {
-    return await navigator.credentials.create({
+    const options = {
       publicKey: optionsFromServer,
-    });
+    };
+    console.log(options);
+    return await navigator.credentials.create(options);
   }
   async function sendCertificate(credential) {
     const objRequest = {
@@ -167,7 +168,6 @@ async function registerUser() {
   }
   const reg = await requestRegistration();
   const options = await getOptionsFromServer(reg);
-  console.log(options);
   const cert = await makeCertificate(options);
   return await sendCertificate(cert);
 }
@@ -266,7 +266,6 @@ function deserializeArrayBuffer(arr) {
 }
 
 function deserializeOptions(obj) {
-  console.log(obj);
   let objRet = {};
   objRet.challenge = deserializeArrayBuffer(obj.challenge);
   objRet.rp = obj.challenge.rp;
