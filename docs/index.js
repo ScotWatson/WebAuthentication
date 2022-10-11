@@ -114,9 +114,9 @@ Promise.all( [ asyncLoad, asyncServiceWorker ] ).then(function ( [ evtWindow, my
   pButtons.appendChild(btnLogin);
 });
 
-function registerUser() {
+async function registerUser() {
   const strAuthURL = "https://scotwatson.github.io/WebAuthentication/auth";
-  function requestRegistration() {
+  async function requestRegistration() {
     const objRegistration = {
       username: inpUsername.value,
       alg: selectAlgorithm.value,
@@ -135,20 +135,20 @@ function registerUser() {
       redirect: "follow",
       referrer: "about:client",
     });
-    return fetch(reqRegister);
+    return await fetch(reqRegister);
   }
-  function getOptionsFromServer(response) {
-    return response.text().then(function (text) {
-      console.log(text);
-      return deserialize(text);
-    }).then(deserializeOptions);
+  async function getOptionsFromServer(response) {
+    const text = await response.text();
+    console.log(text);
+    const flatObj = await deserialize(text);
+    return await deserializeOptions(flatObj);
   }
-  function makeCertificate(optionsFromServer) {
-    return navigator.credentials.create({
+  async function makeCertificate(optionsFromServer) {
+    return await navigator.credentials.create({
       publicKey: optionsFromServer,
     });
   }
-  function sendCertificate(credential) {
+  async function sendCertificate(credential) {
     const objRequest = {
       type: "certificate",
       value: serialize(credential),
@@ -163,9 +163,13 @@ function registerUser() {
       redirect: "follow",
       referrer: "about:client",
     });
-    return fetch(reqCertificate);
+    return await fetch(reqCertificate);
   }
-  return requestRegistration().then(getOptionsFromServer).then(makeCertificate).then(sendCertificate);
+  const reg = await requestRegistration();
+  const options = await getOptionsFromServer(reg);
+  console.log(options);
+  const cert = await makeCertificate(options);
+  return await sendCertificate(cert);
 }
 
 function login() {
