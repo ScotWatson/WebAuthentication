@@ -138,7 +138,10 @@ function registerUser() {
     return fetch(reqRegister);
   }
   function getOptionsFromServer(response) {
-    return response.text().then(deserialize).then(deserializeOptions);
+    return response.text().then(function (text) {
+      console.log(text);
+      return deserialize(text);
+    }).then(deserializeOptions);
   }
   function makeCertificate(optionsFromServer) {
     return navigator.credentials.create({
