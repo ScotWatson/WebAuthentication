@@ -239,7 +239,7 @@ function serialize(obj) {
         if (obj[key] === null) {
           objFlat[key] = null;
         } else if (obj[key] instanceof ArrayBuffer) {
-          objFlat[key] = Array.from(obj[key]);
+          objFlat[key] = Array.from(new Uint8Array(obj[key]));
         } else {
           objFlat[key] = serialize(obj[key]);
         }
@@ -255,7 +255,7 @@ function deserialize(text) {
 }
 
 function deserializeArrayBuffer(arr) {
-  return ArrayBuffer.from(arr);
+  return Uint8Array.from(arr).buffer;
 }
 
 function deserializeOptions(obj) {
