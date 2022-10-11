@@ -4,7 +4,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 */
 
 const asyncServiceWorker = new Promise(function (resolve, reject) {
-  if ("serviceWorker" in navigator) {
+  if (!("serviceWorker" in navigator)) {
     reject(new Error("Service Worker Not Supported"));
     return;
   }
