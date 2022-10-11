@@ -70,7 +70,7 @@ function unknownRequest() {
 }
 
 function createOptions(objRequestValue) {
-  const objRegistration = objRequestValue;
+  const objRegistration = JSON.parse(objRequestValue);
   const alg = objRegistration.alg;
   const username = objRegistration.username;
   const userID = randomBuffer(16);
