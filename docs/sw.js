@@ -173,7 +173,10 @@ function testAssertion(objRequestValue) {
   
 function self_install(e) {
   console.log("(sw.js): Start Installing");
-  self.clients.matchAll().then(function (clientList) {
+  self.clients.matchAll({
+    includeUncontrolled: true,
+    type: "all",
+  }).then(function (clientList) {
     console.log(clientList);
     for (const client of clientList) {
       if (client.url === "index.html") {
