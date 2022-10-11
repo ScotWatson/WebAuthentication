@@ -206,7 +206,7 @@ function self_fetch(e) {
         return fetch(e.request);
     }
   }
-  e.respondWith(getResponse);
+  e.respondWith(getResponse());
   console.log("(sw.js): End Handling Fetch");
   sendMessage("End Handling Fetch");
 }
