@@ -13,7 +13,7 @@ if ("serviceWorker" in navigator) {
     updateViaCache: "none",
   }).then((registration) => {
     myServiceWorkerRegistration = registration;
-    myServiceWorker = myServiceWorkerRegistration.active;
+    myServiceWorker = myServiceWorkerRegistration.active || myServiceWorkerRegistration.installing;
     myServiceWorker.addEventListener("message", function (evt) {
       console.log("sw.js: " + evt.data);
     });
