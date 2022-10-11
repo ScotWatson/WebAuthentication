@@ -259,6 +259,7 @@ function deserializeArrayBuffer(arr) {
 }
 
 function deserializeOptions(obj) {
+  console.log(obj);
   let objRet = {};
   objRet.challenge = deserializeArrayBuffer(obj.challenge);
   objRet.rp = obj.challenge.rp;
