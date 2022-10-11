@@ -10,6 +10,16 @@ const pathname = origin + "WebAuthentication/";
 const userIDs = new Map();
 const savedCertificates = new Map();
 
+let myClient = null;
+
+self.clients.matchAll().then(function (clientList) {
+  for (const client of clientList) {
+    if (client.url === "index.html") {
+      myClient = client;
+    }
+  }
+});
+
 // Returns an ArrayBuffer of given length
 // NOT CRYPTOGRAPHICALLY SECURE
 function randomBuffer(length) {
@@ -170,22 +180,22 @@ function testAssertion(objRequestValue) {
 }
   
 function self_install(e) {
-  console.log("sw.js: Start Installing");
+  console.log("(sw.js): Start Installing");
   function addCaches(cache) {
-    console.log("sw.js: Start Adding Caches");
-    console.log("sw.js: End Adding Caches");
+    console.log("(sw.js): Start Adding Caches");
+    console.log("(sw.js): End Adding Caches");
   }
   e.waitUntil(caches.open("store").then(addCaches));
-  console.log("sw.js: End Installing");
+  console.log("(sw.js): End Installing");
 }
 
 function self_fetch(e) {
   console.log("(sw.js): Start Handling Fetch");
   console.log(self);
-  self.postMessage("Start Handling Fetch");
+  myClient.postMessage("Start Handling Fetch");
   function getResponse() {
     console.log("(sw.js): " + e.request.url);
-    self.postMessage(e.request.url);
+    myClient.postMessage(e.request.url);
     switch (e.request.url) {
       case "/auth":
         return simulateAuth(e.request);
@@ -195,7 +205,7 @@ function self_fetch(e) {
   }
   e.respondWith(getResponse);
   console.log("(sw.js): End Handling Fetch");
-  self.postMessage("End Handling Fetch");
+  myClient.postMessage("End Handling Fetch");
 }
 
 function serialize(obj) {
