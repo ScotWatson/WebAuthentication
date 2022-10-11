@@ -181,6 +181,7 @@ function self_install(e) {
 
 function self_fetch(e) {
   console.log("(sw.js): Start Handling Fetch");
+  console.log(self);
   self.postMessage("Start Handling Fetch");
   function getResponse() {
     console.log("(sw.js): " + e.request.url);
