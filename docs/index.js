@@ -226,35 +226,35 @@ function login() {
 
 function serialize(obj) {
   function reduce(obj) {
-    let objFlat = {};
-    for (let key of Object.keys(obj)) {
-      switch (typeof obj[key]) {
-        case "undefined":
-        case "boolean":
-        case "number":
-        case "bigint":
-        case "string":
-          objFlat[key] = obj[key];
-          break;
-        case "symbol":
-          objFlat[key] = "[symbol]";
-          break;
-        case "function":
-          objFlat[key] = "[function]";
-          break;
-        case "object":
-          if (obj[key] === null) {
-            objFlat[key] = null;
-          } else if (obj[key] instanceof ArrayBuffer) {
-            objFlat[key] = Array.from(new Uint8Array(obj[key]));
-          } else {
-            objFlat[key] = reduce(obj[key]);
-          }
-        default:
-          break;
-      }
+    if Array.isArray(obj) {
+      return obj;
     }
-    return objFlat;
+    switch (typeof obj) {
+      case "undefined":
+      case "boolean":
+      case "number":
+      case "bigint":
+      case "string":
+        return obj;
+      case "symbol":
+        return "[symbol]";
+      case "function":
+        return "[function]";
+      case "object":
+        if (obj === null) {
+          return null;
+        } else if (obj instanceof ArrayBuffer) {
+          return Array.from(new Uint8Array(obj));
+        } else {
+          let objReduced = {};
+          for (let key of Object.keys(obj)) {
+            objReduced[key] = reduce(obj[key]);
+          }
+          return objReduced;
+        }
+      default:
+        throw new Error("Type not recognized");
+    }
   }
   return JSON.stringify(reduce(obj));
 }
