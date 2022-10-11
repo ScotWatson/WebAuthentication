@@ -214,35 +214,38 @@ function self_fetch(e) {
 }
 
 function serialize(obj) {
-  let objFlat = {};
-  for (let key of Object.keys(obj)) {
-    switch (typeof obj[key]) {
-      case "undefined":
-      case "boolean":
-      case "number":
-      case "bigint":
-      case "string":
-        objFlat[key] = obj[key];
-        break;
-      case "symbol":
-        objFlat[key] = "[symbol]";
-        break;
-      case "function":
-        objFlat[key] = "[function]";
-        break;
-      case "object":
-        if (obj[key] === null) {
-          objFlat[key] = null;
-        } else if (obj[key] instanceof ArrayBuffer) {
-          objFlat[key] = Array.from(new Uint8Array(obj[key]));
-        } else {
-          objFlat[key] = serialize(obj[key]);
-        }
-      default:
-        break;
+  function reduce() {
+    let objFlat = {};
+    for (let key of Object.keys(obj)) {
+      switch (typeof obj[key]) {
+        case "undefined":
+        case "boolean":
+        case "number":
+        case "bigint":
+        case "string":
+          objFlat[key] = obj[key];
+          break;
+        case "symbol":
+          objFlat[key] = "[symbol]";
+          break;
+        case "function":
+          objFlat[key] = "[function]";
+          break;
+        case "object":
+          if (obj[key] === null) {
+            objFlat[key] = null;
+          } else if (obj[key] instanceof ArrayBuffer) {
+            objFlat[key] = Array.from(new Uint8Array(obj[key]));
+          } else {
+            objFlat[key] = reduce(obj[key]);
+          }
+        default:
+          break;
+      }
     }
+    return objFlat;
   }
-  return JSON.stringify(objFlat);
+  return JSON.stringify(reduce(obj));
 }
 
 function deserialize(text) {
