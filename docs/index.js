@@ -3,23 +3,18 @@
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-let myServiceWorkerRegistration;
-let myServiceWorker;
-
-if ("serviceWorker" in navigator) {
+const asyncServiceWorker = new Promise(function (resolve, reject) {
+  if ("serviceWorker" in navigator) {
+    reject(new Error("Service Worker Not Supported"));
+    return;
+  }
   navigator.serviceWorker.register("sw.js", {
     scope: "./",
     type: "classic",
     updateViaCache: "none",
-  }).then((registration) => {
-    myServiceWorkerRegistration = registration;
-    myServiceWorker = myServiceWorkerRegistration.active || myServiceWorkerRegistration.installing;
-    myServiceWorker.addEventListener("message", function (evt) {
-      console.log("sw.js: " + evt.data);
-    });
-  });
-}
-
+  }).then(resolve, reject);
+});
+  
 const arrAlgorithms = [
   {name: "HSS-LMS", value: -46},
   {name: "SHAKE256", value: -45},
@@ -79,13 +74,20 @@ const arrAlgorithms = [
   ];
 
 const asyncLoad = new Promise(function (resolve, reject) {
-  window.addEventListener("load", resolve);
+  window.addEventListener("load", function (evt) {
+    resolve(evt);
+  });
 });
 
 let selectAlgorithm;
 let inpUsername;
 
-asyncLoad.then(function () {
+Promise.all( [ asyncLoad, asyncServiceWorker ] ).then(function (evtWindow, myServiceWorkerRegistration) {
+  let myServiceWorker;
+  myServiceWorker = myServiceWorkerRegistration.active || myServiceWorkerRegistration.installing;
+  myServiceWorker.addEventListener("message", function (evt) {
+    console.log("sw.js: " + evt.data);
+  });
   selectAlgorithm = document.createElement("select");
   document.body.appendChild(selectAlgorithm);
   for (let algorithm of arrAlgorithms) {
