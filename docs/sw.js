@@ -170,20 +170,20 @@ function testAssertion(objRequestValue) {
   }
   return getAssertionFromClient().then(getCredential).then(parseCredential);
 }
-  
-function self_install(e) {
-  console.log("(sw.js): Start Installing");
+
+function sendMessage(text) {
   self.clients.matchAll({
     includeUncontrolled: true,
     type: "all",
   }).then(function (clientList) {
-    console.log(clientList);
     for (const client of clientList) {
-      if (client.url === "index.html") {
-        myClient = client;
-      }
+      client.postMessage(text);
     }
   });
+}
+
+function self_install(e) {
+  console.log("(sw.js): Start Installing");
   function addCaches(cache) {
     console.log("(sw.js): Start Adding Caches");
     console.log("(sw.js): End Adding Caches");
@@ -194,11 +194,10 @@ function self_install(e) {
 
 function self_fetch(e) {
   console.log("(sw.js): Start Handling Fetch");
-  console.log(self);
-  myClient.postMessage("Start Handling Fetch");
+  sendMessage("Start Handling Fetch");
   function getResponse() {
     console.log("(sw.js): " + e.request.url);
-    myClient.postMessage(e.request.url);
+    sendMessage(e.request.url);
     switch (e.request.url) {
       case "/auth":
         return simulateAuth(e.request);
@@ -208,7 +207,7 @@ function self_fetch(e) {
   }
   e.respondWith(getResponse);
   console.log("(sw.js): End Handling Fetch");
-  myClient.postMessage("End Handling Fetch");
+  sendMessage("End Handling Fetch");
 }
 
 function serialize(obj) {
