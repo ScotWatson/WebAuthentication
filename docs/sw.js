@@ -5,8 +5,9 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 self.importScripts("https://scotwatson.github.io/WebInterface/window_extensions.js");
 
-const origin = "https://scotwatson.github.io/";
-const pathname = origin + "WebAuthentication/";
+const thisURL = new URL("https://scotwatson.github.io/WebAuthentication/");
+const origin = thisURL.origin;
+const pathname = thisURL.pathname;
 const userIDs = new Map();
 const savedCertificates = new Map();
 
@@ -79,7 +80,7 @@ function createOptions(objRequestValue) {
     "challenge": randomBuffer(16),
     "rp": {
       "name": "Web Authentication Test",
-      "id": pathname,
+      "id": thisURL.hostname + thisURL.pathname,
     },
     "user": {
       "name": objRegistration.username,
@@ -94,6 +95,7 @@ function createOptions(objRequestValue) {
     ],
     "authenticatorSelection": {
       authenticatorAttachment: "platform",
+      userVerification: "discouraged",
     },
     "timeout": 60000,
   };
