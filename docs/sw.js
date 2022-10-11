@@ -200,7 +200,7 @@ function self_fetch(e) {
     console.log("(sw.js): " + e.request.url);
     sendMessage(e.request.url);
     switch (e.request.url) {
-      case "/auth":
+      case "https://scotwatson.github.io/WebAuthentication/auth":
         const r = simulateAuth(e.request);
         console.log(r);
         return r;
