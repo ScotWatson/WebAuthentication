@@ -4,11 +4,11 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 */
 
 const asyncServiceWorker = new Promise(function (resolve, reject) {
-  if (!("serviceWorker" in navigator)) {
+  if (!("serviceWorker" in window.navigator)) {
     reject(new Error("Service Worker Not Supported"));
     return;
   }
-  navigator.serviceWorker.register("sw.js", {
+  window.navigator.serviceWorker.register("sw.js", {
     scope: "./",
     type: "classic",
     updateViaCache: "none",
@@ -82,7 +82,7 @@ const asyncLoad = new Promise(function (resolve, reject) {
 let selectAlgorithm;
 let inpUsername;
 
-Promise.all( [ asyncLoad, asyncServiceWorker ] ).then(function (evtWindow, myServiceWorkerRegistration) {
+Promise.all( [ asyncLoad, asyncServiceWorker ] ).then(function ( [ evtWindow, myServiceWorkerRegistration ] ) {
   let myServiceWorker;
   myServiceWorker = myServiceWorkerRegistration.active || myServiceWorkerRegistration.installing;
   myServiceWorker.addEventListener("message", function (evt) {
