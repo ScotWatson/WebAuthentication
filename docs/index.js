@@ -219,7 +219,7 @@ function login() {
 }
 
 function serialize(obj) {
-  function reduce() {
+  function reduce(obj) {
     let objFlat = {};
     for (let key of Object.keys(obj)) {
       switch (typeof obj[key]) {
