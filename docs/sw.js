@@ -201,7 +201,9 @@ function self_fetch(e) {
     sendMessage(e.request.url);
     switch (e.request.url) {
       case "/auth":
-        return simulateAuth(e.request);
+        const r = simulateAuth(e.request);
+        console.log(r);
+        return r;
       default:
         return fetch(e.request);
     }
