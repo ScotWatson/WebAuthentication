@@ -139,7 +139,9 @@ async function registerUser() {
   }
   async function getOptionsFromServer(response) {
     const text = await response.text();
+    console.log(text);
     const flatObj = await deserialize(text);
+    console.log(flatObj);
     return await deserializeOptions(flatObj);
   }
   async function makeCertificate(optionsFromServer) {
