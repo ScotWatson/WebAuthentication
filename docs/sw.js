@@ -205,7 +205,7 @@ function self_fetch(e) {
   async function getResponse() {
     console.log("(sw.js): " + "Request URL: " + e.request.url);
     sendMessage("Request URL: " + e.request.url);
-    console.log("(sw.js): " + "Request Body: " + e.request.body.text());
+    console.log("(sw.js): " + "Request Body: " + e.request.text());
     sendMessage("Request Body: " + e.request.body.text());
     let response;
     switch (e.request.url) {
