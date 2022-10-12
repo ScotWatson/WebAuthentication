@@ -99,12 +99,12 @@ function createOptions(objRequestValue) {
     },
     "timeout": 60000,
   };
-  return ResponseOK(serialize(optionsFromServer));
+  return ResponseOK(JSON.stringify(reduceForJSON(optionsFromServer)));
 }
 
 function saveCertificate(objRequestValue) {
   console.log(objRequestValue);
-  const objCertificate = deserializeCertificate(deserialize(objRequestValue));
+  const objCertificate = expandCertificateFromJSON(JSON.parse(objRequestValue));
   savedCertificates.set(objCertificate.id, objCertificate);
   return new ResponseOK("");
 }
@@ -129,7 +129,7 @@ function sendChallenge(objRequestValue) {
 
 function testAssertion(objRequestValue) {
   function getAssertionFromClient() {
-    return deserializeAssertion(deserialize(objRequestValue));
+    return expandAssertionFromJSON(JSON.parse(objRequestValue));
   }
   function getCredential(options) {
     return navigator.credentials.get({
@@ -216,69 +216,62 @@ function self_fetch(e) {
   sendMessage("End Handling Fetch");
 }
 
-function serialize(obj) {
-  function reduce(obj) {
-    if (Array.isArray(obj)) {
-      return obj;
-    }
-    switch (typeof obj) {
-      case "undefined":
-      case "boolean":
-      case "number":
-      case "bigint":
-      case "string":
-        return obj;
-      case "symbol":
-        return "[symbol]";
-      case "function":
-        return "[function]";
-      case "object":
-        if (obj === null) {
-          return null;
-        } else if (obj instanceof ArrayBuffer) {
-          return Array.from(new Uint8Array(obj));
-        } else {
-          let objReduced = {};
-          for (let key of Object.keys(obj)) {
-            objReduced[key] = reduce(obj[key]);
-          }
-          return objReduced;
-        }
-      default:
-        throw new Error("Type not recognized");
-    }
+function reduceForJSON(obj) {
+  if (Array.isArray(obj)) {
+    return obj;
   }
-  return JSON.stringify(reduce(obj));
+  switch (typeof obj) {
+    case "undefined":
+    case "boolean":
+    case "number":
+    case "bigint":
+    case "string":
+      return obj;
+    case "symbol":
+      return "[symbol]";
+    case "function":
+      return "[function]";
+    case "object":
+      if (obj === null) {
+        return null;
+      } else if (obj instanceof ArrayBuffer) {
+        return Array.from(new Uint8Array(obj));
+      } else {
+        let objReduced = {};
+        for (let key of Object.keys(obj)) {
+          objReduced[key] = reduceForJSON(obj[key]);
+        }
+        return objReduced;
+      }
+    default:
+      throw new Error("Type not recognized");
+  }
 }
 
-function deserialize(text) {
-  return JSON.parse(text);
-}
-
-function deserializeArrayBuffer(arr) {
+function expandArrayBufferFromJSON(arr) {
   return Uint8Array.from(arr).buffer;
 }
 
-function deserializeCertificate(obj) {
+function expandCertificateFromJSON(obj) {
   let objRet = {};
   objRet.id = obj.id;
-  objRet.rawId = deserializeArrayBuffer(obj.rawId);
+  objRet.rawId = expandArrayBufferFromJSON(obj.rawId);
   objRet.response = Object.create(AuthenticatorAttestationResponse.prototype);
-  objRet.response.clientDataJSON = deserializeArrayBuffer(obj.response.clientDataJSON);
-  objRet.response.attestationObject = deserializeArrayBuffer(obj.response.attestationObject);
+  objRet.response.clientDataJSON = expandArrayBufferFromJSON(obj.response.clientDataJSON);
+  objRet.response.attestationObject = expandArrayBufferFromJSON(obj.response.attestationObject);
   objRet.type = obj.type;
   return objRet;
 }
 
-function deserializeAssertion(obj) {
+function expandAssertionFromJSON(obj) {
   let objRet = Object.create(PublicKeyCredential.prototype);
   objRet.id = obj.id;
-  objRet.rawId = deserializeArrayBuffer(obj.rawId);
+  objRet.rawId = expandArrayBufferFromJSON(obj.rawId);
   objRet.response = Object.create(AuthenticatorAttestationResponse.prototype);
-  objRet.response.authenticatorData = deserializeArrayBuffer(obj.response.authenticatorData);
-  objRet.response.clientDataJSON = deserializeArrayBuffer(obj.response.clientDataJSON);
-  objRet.response.signature = deserializeArrayBuffer(obj.response.signature);
-  objRet.response.userHandle = deserializeArrayBuffer(obj.response.userHandle);
+  objRet.response.authenticatorData = expandArrayBufferFromJSON(obj.response.authenticatorData);
+  objRet.response.clientDataJSON = expandArrayBufferFromJSON(obj.response.clientDataJSON);
+  objRet.response.signature = expandArrayBufferFromJSON(obj.response.signature);
+  objRet.response.userHandle = expandArrayBufferFromJSON(obj.response.userHandle);
   objRet.type = obj.type;
   if (obj.allowCredentials) {
     objRet.allowCredentials = obj.allowCredentials;
