@@ -162,11 +162,8 @@ async function registerUser() {
       type: "certificate",
       value: credentialObj,
     };
-    console.log(objRequest);
     const reducedObj = reduceForJSON(objRequest);
-    console.log(reducedObj);
     const bodyText = JSON.stringify(reducedObj);
-    console.log(bodyText);
     const reqCertificate = new Request(strAuthURL, {
       method: "POST",
       headers: {},
