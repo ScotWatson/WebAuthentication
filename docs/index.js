@@ -115,126 +115,110 @@ Promise.all( [ asyncLoad, asyncServiceWorker ] ).then(function ( [ evtWindow, my
 
 async function registerUser() {
   const strAuthURL = "https://scotwatson.github.io/WebAuthentication/auth";
-  async function requestRegistration() {
-    const objRegistration = {
-      username: inpUsername.value,
-      alg: selectAlgorithm.value,
-    };
-    const objRequest = {
-      type: "register",
-      value: objRegistration,
-    };
-    const reqRegister = new Request(strAuthURL, {
-      method: "POST",
-      headers: {},
-      body: JSON.stringify(reduceForJSON(objRequest)),
-      mode: "cors",
-      credentials: "same-origin",
-      cache: "no-store",
-      redirect: "follow",
-      referrer: "about:client",
-    });
-    return await fetch(reqRegister);
-  }
-  async function getOptionsFromServer(response) {
-    const text = await response.text();
-    const reducedObj = JSON.parse(text);
-    return expandOptionsFromJSON(reducedObj);
-  }
-  async function makeCertificate(optionsFromServer) {
-    const options = {
-      publicKey: optionsFromServer,
-    };
-    return await navigator.credentials.create(options);
-  }
-  async function sendCertificate(credential) {
-    const credentialObj = {
-      authenticatorAttachment: credential.authenticatorAttachment,
-      id: credential.id,
-      rawId: credential.rawId,
-      response: {
-        attestationObject: credential.response.attestationObject,
-        clientDataJSON: credential.response.clientDataJSON,
-      },
-      type: credential.type,
-    };
-    const objRequest = {
-      type: "certificate",
-      value: credentialObj,
-    };
-    const reducedObj = reduceForJSON(objRequest);
-    const bodyText = JSON.stringify(reducedObj);
-    const reqCertificate = new Request(strAuthURL, {
-      method: "POST",
-      headers: {},
-      body: bodyText,
-      mode: "cors",
-      credentials: "same-origin",
-      cache: "no-store",
-      redirect: "follow",
-      referrer: "about:client",
-    });
-    return await fetch(reqCertificate);
-  }
-  const reg = await requestRegistration();
-  const options = await getOptionsFromServer(reg);
-  const cert = await makeCertificate(options);
-  return await sendCertificate(cert);
+  // Request Registration
+  const objRegistration = {
+    username: inpUsername.value,
+    alg: selectAlgorithm.value,
+  };
+  const objRequest = {
+    type: "register",
+    value: objRegistration,
+  };
+  const reqRegister = new Request(strAuthURL, {
+    method: "POST",
+    headers: {},
+    body: JSON.stringify(reduceForJSON(objRequest)),
+    mode: "cors",
+    credentials: "same-origin",
+    cache: "no-store",
+    redirect: "follow",
+    referrer: "about:client",
+  });
+  const regResponse = await fetch(reqRegister);
+  // Get Options From Server
+  const text = await regResponse.text();
+  const reducedObj = JSON.parse(text);
+  const optionsFromServer = expandOptionsFromJSON(reducedObj);
+  // Make Certificate
+  const options = {
+    publicKey: optionsFromServer,
+  };
+  const credential = await navigator.credentials.create(options);
+  // sendCertificate
+  const credentialObj = {
+    authenticatorAttachment: credential.authenticatorAttachment,
+    id: credential.id,
+    rawId: credential.rawId,
+    response: {
+      attestationObject: credential.response.attestationObject,
+      clientDataJSON: credential.response.clientDataJSON,
+    },
+    type: credential.type,
+  };
+  const objRequest = {
+    type: "certificate",
+    value: credentialObj,
+  };
+  const reducedObj = reduceForJSON(objRequest);
+  const bodyText = JSON.stringify(reducedObj);
+  const reqCertificate = new Request(strAuthURL, {
+    method: "POST",
+    headers: {},
+    body: bodyText,
+    mode: "cors",
+    credentials: "same-origin",
+    cache: "no-store",
+    redirect: "follow",
+    referrer: "about:client",
+  });
+  return await fetch(reqCertificate);
 }
 
 async function login() {
   const strAuthURL = "https://scotwatson.github.io/WebAuthentication/auth";
-  async function requestLogin() {
-    const objLogin = {
-      username: inpUsername.value,
-    };
-    const objRequest = {
-      type: "login",
-      value: objLogin,
-    };
-    const reqLogin = new Request(strAuthURL, {
-      method: "POST",
-      headers: {},
-      body: JSON.stringify(reduceForJSON(objRequest)),
-      mode: "cors",
-      credentials: "same-origin",
-      cache: "no-store",
-      redirect: "follow",
-      referrer: "about:client",
-    });
-    return await fetch(reqLogin);
-  }
-  async function getChallengeFromServer(response) {
-    const text = await response.text();
-    const reducedObj = JSON.parse(text);
-    return expandChallengeFromJSON(reducedObj);
-  }
-  async function makeAssertion(optionsFromServer) {
-    return await navigator.credentials.get({
-      publicKey: optionsFromServer,
-    });
-  }
-  async function sendAssertion(assertion) {
-    const objRequest = {
-      type: "assert",
-      value: assertion,
-    };
-    const reqAssert = new Request(strAuthURL, {
-      method: "POST",
-      headers: {},
-      body: JSON.stringify(reduceForJSON(objRequest)),
-      mode: "cors",
-      credentials: "same-origin",
-      cache: "no-store",
-      redirect: "follow",
-      referrer: "about:client",
-    });
-    return await fetch(reqAssert);
-  }
-  const login = await requestLogin();
-  const challenge = await getChallengeFromServer(login);
-  const assertion = await makeAssertion(challenge);
-  return await sendAssertion(assertion);
+  // Request Login
+  const objLogin = {
+    username: inpUsername.value,
+  };
+  const objRequest = {
+    type: "login",
+    value: objLogin,
+  };
+  const reqLogin = new Request(strAuthURL, {
+    method: "POST",
+    headers: {},
+    body: JSON.stringify(reduceForJSON(objRequest)),
+    mode: "cors",
+    credentials: "same-origin",
+    cache: "no-store",
+    redirect: "follow",
+    referrer: "about:client",
+  });
+  const loginResponse = await fetch(reqLogin);
+  // Get Challenge From Server
+  const text = await loginResponse.text();
+  const reducedObj = JSON.parse(text);
+  const optionsFromServer = expandChallengeFromJSON(reducedObj);
+  // Make Assertion
+  const assertion = await navigator.credentials.get({
+    publicKey: optionsFromServer,
+  });
+  // Send Assertion
+  const objRequest = {
+    type: "assert",
+    value: assertion,
+  };
+  const reqAssert = new Request(strAuthURL, {
+    method: "POST",
+    headers: {},
+    body: JSON.stringify(reduceForJSON(objRequest)),
+    mode: "cors",
+    credentials: "same-origin",
+    cache: "no-store",
+    redirect: "follow",
+    referrer: "about:client",
+  });
+  return await fetch(reqAssert);
 }
 
 function reduceForJSON(obj) {
