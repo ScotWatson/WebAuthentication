@@ -107,7 +107,7 @@ function saveCertificate(objRequestValue) {
   const objCertificate = expandCertificateFromJSON(objRequestValue);
   console.log(objCertificate);
   savedCertificates.set(objCertificate.id, objCertificate);
-  return new ResponseOK("");
+  return ResponseOK("");
 }
 
 function sendChallenge(objRequestValue) {
@@ -125,7 +125,7 @@ function sendChallenge(objRequestValue) {
       }
     ]
   };
-  return new ResponseOK("");
+  return ResponseOK(JSON.stringify(reduceForJSON(optionsFromServer)));
 }
 
 function testAssertion(objRequestValue) {
