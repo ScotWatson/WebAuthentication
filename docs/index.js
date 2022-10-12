@@ -120,14 +120,14 @@ async function registerUser() {
     username: inpUsername.value,
     alg: selectAlgorithm.value,
   };
-  const objRequest = {
+  const objRegisterRequest = {
     type: "register",
     value: objRegistration,
   };
   const reqRegister = new Request(strAuthURL, {
     method: "POST",
     headers: {},
-    body: JSON.stringify(reduceForJSON(objRequest)),
+    body: JSON.stringify(reduceForJSON(objRegisterRequest)),
     mode: "cors",
     credentials: "same-origin",
     cache: "no-store",
@@ -155,16 +155,14 @@ async function registerUser() {
     },
     type: credential.type,
   };
-  const objRequest = {
+  const objCertificateRequest = {
     type: "certificate",
     value: credentialObj,
   };
-  const reducedObj = reduceForJSON(objRequest);
-  const bodyText = JSON.stringify(reducedObj);
   const reqCertificate = new Request(strAuthURL, {
     method: "POST",
     headers: {},
-    body: bodyText,
+    body: JSON.stringify(reduceForJSON(objCertificateRequest)),
     mode: "cors",
     credentials: "same-origin",
     cache: "no-store",
