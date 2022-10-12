@@ -299,5 +299,6 @@ function expandChallengeFromJSON(obj) {
     objRet.allowCredentials.push(newDesc);
   }
   objRet.timeout = obj.timeout;
+  objRet.userVerification = obj.userVerification;
   return objRet;
 }
