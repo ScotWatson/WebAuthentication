@@ -151,6 +151,8 @@ async function registerUser() {
     return await navigator.credentials.create(options);
   }
   async function sendCertificate(credential) {
+    console.log(credential);
+    console.log(Object.keys(credential));
     const objRequest = {
       type: "certificate",
       value: credential,
@@ -255,7 +257,7 @@ function reduceForJSON(obj) {
         return Array.from(new Uint8Array(obj));
       } else {
         let objReduced = {};
-        for (let key of Object.keys(obj)) {
+        for (const key of Object.keys(obj)) {
           objReduced[key] = reduceForJSON(obj[key]);
         }
         return objReduced;
