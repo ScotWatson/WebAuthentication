@@ -203,21 +203,26 @@ function self_fetch(e) {
   console.log("(sw.js): Start Handling Fetch");
   sendMessage("Start Handling Fetch");
   async function getResponse() {
-    console.log("(sw.js): " + e.request.url);
-    sendMessage(e.request.url);
+    console.log("(sw.js): " + "Request URL: " + e.request.url);
+    sendMessage("Request URL: " + e.request.url);
+    console.log("(sw.js): " + "Request Body: " + e.request.body.text());
+    sendMessage("Request Body: " + e.request.body.text());
+    let response;
     switch (e.request.url) {
       case "https://scotwatson.github.io/WebAuthentication/auth":
-        const r = await simulateAuth(e.request);
-        console.log(e.request);
-        console.log(r);
-        return r;
+        response = await simulateAuth(e.request);
       default:
-        return await fetch(e.request);
+        response = await fetch(e.request);
     }
+    console.log("(sw.js): " + "Response Status: " + response.status);
+    sendMessage("Response Status: " + response.status);
+    console.log("(sw.js): " + "Response Body: " + response.body.text());
+    sendMessage("Response Body: " + response.body.text());
+    console.log("(sw.js): End Handling Fetch");
+    sendMessage("End Handling Fetch");
+    return response;
   }
   e.respondWith(getResponse());
-  console.log("(sw.js): End Handling Fetch");
-  sendMessage("End Handling Fetch");
 }
 
 function reduceForJSON(obj) {
