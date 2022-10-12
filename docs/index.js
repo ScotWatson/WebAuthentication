@@ -291,7 +291,13 @@ function expandChallengeFromJSON(obj) {
   let objRet = {};
   objRet.challenge = expandArrayBufferFromJSON(obj.challenge);
   objRet.rp = obj.rp;
-  objRet.allowCredentials = obj.allowCredentials;
+  objRet.allowCredentials = [];
+  for (const desc of obj.allowCredentials) {
+    const newDesc = {};
+    newDesc.type = desc.type;
+    newDesc.id = expandArrayBufferFromJSON(desc.id);
+    objRet.allowCredentials.push(newDesc);
+  }
   objRet.timeout = obj.timeout;
   return objRet;
 }
