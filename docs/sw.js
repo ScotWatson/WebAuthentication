@@ -104,7 +104,8 @@ function createOptions(objRequestValue) {
 
 function saveCertificate(objRequestValue) {
   console.log(objRequestValue);
-  const objCertificate = expandCertificateFromJSON(JSON.parse(objRequestValue));
+  const objCertificate = expandCertificateFromJSON(objRequestValue);
+  console.log(objCertificate);
   savedCertificates.set(objCertificate.id, objCertificate);
   return new ResponseOK("");
 }
