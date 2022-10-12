@@ -257,7 +257,7 @@ function expandCertificateFromJSON(obj) {
   let objRet = {};
   objRet.id = obj.id;
   objRet.rawId = expandArrayBufferFromJSON(obj.rawId);
-  objRet.response = Object.create(AuthenticatorAttestationResponse.prototype);
+  objRet.response = {};
   objRet.response.clientDataJSON = expandArrayBufferFromJSON(obj.response.clientDataJSON);
   objRet.response.attestationObject = expandArrayBufferFromJSON(obj.response.attestationObject);
   objRet.type = obj.type;
@@ -268,7 +268,7 @@ function expandAssertionFromJSON(obj) {
   let objRet = Object.create(PublicKeyCredential.prototype);
   objRet.id = obj.id;
   objRet.rawId = expandArrayBufferFromJSON(obj.rawId);
-  objRet.response = Object.create(AuthenticatorAttestationResponse.prototype);
+  objRet.response = {};
   objRet.response.authenticatorData = expandArrayBufferFromJSON(obj.response.authenticatorData);
   objRet.response.clientDataJSON = expandArrayBufferFromJSON(obj.response.clientDataJSON);
   objRet.response.signature = expandArrayBufferFromJSON(obj.response.signature);
