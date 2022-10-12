@@ -138,21 +138,16 @@ async function registerUser() {
   }
   async function getOptionsFromServer(response) {
     const text = await response.text();
-    console.log(text);
     const reducedObj = JSON.parse(text);
-    console.log(reducedObj);
     return expandOptionsFromJSON(reducedObj);
   }
   async function makeCertificate(optionsFromServer) {
     const options = {
       publicKey: optionsFromServer,
     };
-    console.log(options);
     return await navigator.credentials.create(options);
   }
   async function sendCertificate(credential) {
-    console.log(credential);
-    console.log(Object.keys(credential));
     const objRequest = {
       type: "certificate",
       value: credential,
