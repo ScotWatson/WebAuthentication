@@ -123,7 +123,8 @@ function sendChallenge(objRequestValue) {
         "type": "public-key",
         "id": userID,
       }
-    ]
+    ],
+    "userVerification": "discouraged",
   };
   return ResponseOK(JSON.stringify(reduceForJSON(challengeFromServer)));
 }
