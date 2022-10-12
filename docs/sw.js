@@ -71,7 +71,7 @@ function unknownRequest() {
 }
 
 function createOptions(objRequestValue) {
-  const objRegistration = JSON.parse(objRequestValue);
+  const objRegistration = objRequestValue;
   const alg = objRegistration.alg;
   const username = objRegistration.username;
   const userID = randomBuffer(16);
@@ -102,9 +102,7 @@ function createOptions(objRequestValue) {
   return ResponseOK(serialize(optionsFromServer));
 }
 
-function saveCertificate(obj) {
-  console.log(obj);
-  const objRequestValue = JSON.parse(obj);
+function saveCertificate(objRequestValue) {
   console.log(objRequestValue);
   const objCertificate = deserializeCertificate(deserialize(objRequestValue));
   savedCertificates.set(objCertificate.id, objCertificate);
