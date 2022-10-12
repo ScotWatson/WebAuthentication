@@ -178,14 +178,14 @@ async function login() {
   const objLogin = {
     username: inpUsername.value,
   };
-  const objRequest = {
+  const objLoginRequest = {
     type: "login",
     value: objLogin,
   };
   const reqLogin = new Request(strAuthURL, {
     method: "POST",
     headers: {},
-    body: JSON.stringify(reduceForJSON(objRequest)),
+    body: JSON.stringify(reduceForJSON(objLoginRequest)),
     mode: "cors",
     credentials: "same-origin",
     cache: "no-store",
@@ -202,14 +202,14 @@ async function login() {
     publicKey: optionsFromServer,
   });
   // Send Assertion
-  const objRequest = {
+  const objAssertRequest = {
     type: "assert",
     value: assertion,
   };
   const reqAssert = new Request(strAuthURL, {
     method: "POST",
     headers: {},
-    body: JSON.stringify(reduceForJSON(objRequest)),
+    body: JSON.stringify(reduceForJSON(objAssertRequest)),
     mode: "cors",
     credentials: "same-origin",
     cache: "no-store",
