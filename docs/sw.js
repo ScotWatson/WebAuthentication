@@ -202,16 +202,17 @@ function self_install(e) {
 function self_fetch(e) {
   console.log("(sw.js): Start Handling Fetch");
   sendMessage("Start Handling Fetch");
-  function getResponse() {
+  async function getResponse() {
     console.log("(sw.js): " + e.request.url);
     sendMessage(e.request.url);
     switch (e.request.url) {
       case "https://scotwatson.github.io/WebAuthentication/auth":
-        const r = simulateAuth(e.request);
+        const r = await simulateAuth(e.request);
+        console.log(e.request);
         console.log(r);
         return r;
       default:
-        return fetch(e.request);
+        return await fetch(e.request);
     }
   }
   e.respondWith(getResponse());
