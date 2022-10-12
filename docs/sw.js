@@ -114,7 +114,7 @@ function sendChallenge(objRequestValue) {
   const username = objRequestValue.username;
   const userID = userIDs.get(username);
   const userCertificate = savedCertificates.get(userID);
-  const optionsFromServer = {
+  const challengeFromServer = {
     "challenge": randomBuffer(16),
     "timeout": 60000,
     "rpId": pathname + "/auth",
@@ -125,7 +125,7 @@ function sendChallenge(objRequestValue) {
       }
     ]
   };
-  return ResponseOK(JSON.stringify(reduceForJSON(optionsFromServer)));
+  return ResponseOK(JSON.stringify(reduceForJSON(challengeFromServer)));
 }
 
 function testAssertion(objRequestValue) {
