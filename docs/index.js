@@ -157,7 +157,7 @@ async function registerUser() {
       value: serialize(credential),
     };
     const reqCertificate = new Request(strAuthURL, {
-      method: "GET",
+      method: "POST",
       headers: {},
       body: JSON.stringify(objRequest),
       mode: "cors",
@@ -185,7 +185,7 @@ function login() {
       value: serialize(objLogin),
     };
     const reqLogin = new Request(strAuthURL, {
-      method: "GET",
+      method: "POST",
       headers: {},
       body: JSON.stringify(objRequest),
       mode: "cors",
@@ -210,7 +210,7 @@ function login() {
       value: serialize(assertion),
     };
     const reqAssert = new Request(strAuthURL, {
-      method: "GET",
+      method: "POST",
       headers: {},
       body: JSON.stringify(objRequest),
       mode: "cors",
