@@ -206,7 +206,7 @@ function self_fetch(e) {
     console.log("(sw.js): " + "Request URL: " + e.request.url);
     sendMessage("Request URL: " + e.request.url);
     console.log("(sw.js): " + "Request Body: " + e.request.text());
-    sendMessage("Request Body: " + e.request.body.text());
+    sendMessage("Request Body: " + e.request.text());
     let response;
     switch (e.request.url) {
       case "https://scotwatson.github.io/WebAuthentication/auth":
