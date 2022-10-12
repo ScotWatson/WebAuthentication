@@ -23,7 +23,7 @@ function randomBuffer(length) {
   return retView.buffer;
 }
 
-function simulateAuth(request) {
+async function simulateAuth(request) {
   function parse(text) {
     const objRequest = JSON.parse(text);
     switch (objRequest.type) {
@@ -39,7 +39,8 @@ function simulateAuth(request) {
         return unknownRequest();
     }
   }
-  return request.text().then(parse);
+  const thisText = await request.text();
+  return parse(thisText);
 }
 
 function ResponseOK(objBody) {
