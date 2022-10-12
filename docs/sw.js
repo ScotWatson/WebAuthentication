@@ -216,8 +216,8 @@ function self_fetch(e) {
     }
     console.log("(sw.js): " + "Response Status: " + response.status);
     sendMessage("Response Status: " + response.status);
-    console.log("(sw.js): " + "Response Body: " + response.body.text());
-    sendMessage("Response Body: " + response.body.text());
+    console.log("(sw.js): " + "Response Body: " + response.text());
+    sendMessage("Response Body: " + response.text());
     console.log("(sw.js): End Handling Fetch");
     sendMessage("End Handling Fetch");
     return response;
