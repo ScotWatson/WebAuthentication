@@ -3,17 +3,16 @@
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-const asyncServiceWorker = new Promise(function (resolve, reject) {
+const asyncServiceWorker = (async function () {
   if (!("serviceWorker" in window.navigator)) {
-    reject(new Error("Service Worker Not Supported"));
-    return;
+    throw new Error("Service Worker Not Supported");
   }
-  window.navigator.serviceWorker.register("sw.js", {
+  return await window.navigator.serviceWorker.register("sw.js", {
     scope: "./",
     type: "classic",
     updateViaCache: "none",
-  }).then(resolve, reject);
-});
+  });
+})();
   
 const arrAlgorithms = [
   {name: "HSS-LMS", value: -46},
@@ -123,12 +122,12 @@ async function registerUser() {
     };
     const objRequest = {
       type: "register",
-      value: serialize(objRegistration),
+      value: objRegistration,
     };
     const reqRegister = new Request(strAuthURL, {
       method: "POST",
       headers: {},
-      body: JSON.stringify(objRequest),
+      body: JSON.stringify(reduceForJSON(objRequest)),
       mode: "cors",
       credentials: "same-origin",
       cache: "no-store",
@@ -140,9 +139,9 @@ async function registerUser() {
   async function getOptionsFromServer(response) {
     const text = await response.text();
     console.log(text);
-    const flatObj = await deserialize(text);
-    console.log(flatObj);
-    return await deserializeOptions(flatObj);
+    const reducedObj = JSON.parse(text);
+    console.log(reducedObj);
+    return expandOptionsFromJSON(reducedObj);
   }
   async function makeCertificate(optionsFromServer) {
     const options = {
@@ -154,12 +153,12 @@ async function registerUser() {
   async function sendCertificate(credential) {
     const objRequest = {
       type: "certificate",
-      value: serialize(credential),
+      value: credential,
     };
     const reqCertificate = new Request(strAuthURL, {
       method: "POST",
       headers: {},
-      body: JSON.stringify(objRequest),
+      body: JSON.stringify(reduceForJSON(objRequest)),
       mode: "cors",
       credentials: "same-origin",
       cache: "no-store",
@@ -174,107 +173,105 @@ async function registerUser() {
   return await sendCertificate(cert);
 }
 
-function login() {
+async function login() {
   const strAuthURL = "https://scotwatson.github.io/WebAuthentication/auth";
-  function requestLogin() {
+  async function requestLogin() {
     const objLogin = {
       username: inpUsername.value,
     };
     const objRequest = {
       type: "login",
-      value: serialize(objLogin),
+      value: objLogin,
     };
     const reqLogin = new Request(strAuthURL, {
       method: "POST",
       headers: {},
-      body: JSON.stringify(objRequest),
+      body: JSON.stringify(reduceForJSON(objRequest)),
       mode: "cors",
       credentials: "same-origin",
       cache: "no-store",
       redirect: "follow",
       referrer: "about:client",
     });
-    return fetch(reqLogin);
+    return await fetch(reqLogin);
   }
-  function getChallengeFromServer(response) {
-    return response.text().then(deserialize).then(deserializeOptions);
+  async function getChallengeFromServer(response) {
+    const text = await response.text();
+    const reducedObj = JSON.parse(text);
+    return expandOptionsFromJSON(reducedObj);
   }
-  function makeAssertion(optionsFromServer) {
-    return navigator.credentials.get({
+  async function makeAssertion(optionsFromServer) {
+    return await navigator.credentials.get({
       publicKey: optionsFromServer,
     });
   }
-  function sendAssertion(assertion) {
+  async function sendAssertion(assertion) {
     const objRequest = {
       type: "assert",
-      value: serialize(assertion),
+      value: assertion,
     };
     const reqAssert = new Request(strAuthURL, {
       method: "POST",
       headers: {},
-      body: JSON.stringify(objRequest),
+      body: JSON.stringify(reduceForJSON(objRequest)),
       mode: "cors",
       credentials: "same-origin",
       cache: "no-store",
       redirect: "follow",
       referrer: "about:client",
     });
-    return fetch(reqAssert);
+    return await fetch(reqAssert);
   }
-  return requestLogin().then(getChallengeFromServer).then(makeAssertion).then(sendAssertion);
+  const login = await requestLogin();
+  const challenge = await getChallengeFromServer(login);
+  const assertion = await makeAssertion(challenge);
+  return await sendAssertion(assertion);
 }
 
-function serialize(obj) {
-  function reduce(obj) {
-    if (Array.isArray(obj)) {
+function reduceForJSON(obj) {
+  if (Array.isArray(obj)) {
+    return obj;
+  }
+  switch (typeof obj) {
+    case "undefined":
+    case "boolean":
+    case "number":
+    case "bigint":
+    case "string":
       return obj;
-    }
-    switch (typeof obj) {
-      case "undefined":
-      case "boolean":
-      case "number":
-      case "bigint":
-      case "string":
-        return obj;
-      case "symbol":
-        return "[symbol]";
-      case "function":
-        return "[function]";
-      case "object":
-        if (obj === null) {
-          return null;
-        } else if (obj instanceof ArrayBuffer) {
-          return Array.from(new Uint8Array(obj));
-        } else {
-          let objReduced = {};
-          for (let key of Object.keys(obj)) {
-            objReduced[key] = reduce(obj[key]);
-          }
-          return objReduced;
+    case "symbol":
+      return "[symbol]";
+    case "function":
+      return "[function]";
+    case "object":
+      if (obj === null) {
+        return null;
+      } else if (obj instanceof ArrayBuffer) {
+        return Array.from(new Uint8Array(obj));
+      } else {
+        let objReduced = {};
+        for (let key of Object.keys(obj)) {
+          objReduced[key] = reduceForJSON(obj[key]);
         }
-      default:
-        throw new Error("Type not recognized");
-    }
+        return objReduced;
+      }
+    default:
+      throw new Error("Type not recognized");
   }
-  return JSON.stringify(reduce(obj));
 }
 
-function deserialize(text) {
-  return JSON.parse(text);
-}
-
-function deserializeArrayBuffer(arr) {
+function expandArrayBufferFromJSON(arr) {
   return Uint8Array.from(arr).buffer;
 }
 
-function deserializeOptions(obj) {
+function expandOptionsFromJSON(obj) {
   let objRet = {};
-  objRet.challenge = deserializeArrayBuffer(obj.challenge);
+  objRet.challenge = expandArrayBufferFromJSON(obj.challenge);
   objRet.rp = obj.rp;
   objRet.user = {};
   objRet.user.name = obj.user.name;
   objRet.user.displayName = obj.user.displayName;
-  objRet.user.id = deserializeArrayBuffer(obj.user.id);
+  objRet.user.id = expandArrayBufferFromJSON(obj.user.id);
   objRet.pubKeyCredParams = obj.pubKeyCredParams;
   objRet.authenticatorSelection = obj.authenticatorSelection;
   objRet.timeout = obj.timeout;
