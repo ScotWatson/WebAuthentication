@@ -150,6 +150,12 @@ async function registerUser() {
   async function sendCertificate(credential) {
     console.log(credential);
     console.log(Object.getOwnPropertyDescriptors(credential));
+    console.log(credential.authenticatorAttachment);
+    console.log(credential.id);
+    console.log(credential.rawId);
+    console.log(credential.response.attestationObject);
+    console.log(credential.response.clientDataJSON);
+    console.log(credential.type);
     const objRequest = {
       type: "certificate",
       value: credential,
