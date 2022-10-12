@@ -238,7 +238,7 @@ function reduceForJSON(obj) {
         return Array.from(new Uint8Array(obj));
       } else {
         let objReduced = {};
-        for (let key of Object.keys(obj)) {
+        for (const key in obj) {
           objReduced[key] = reduceForJSON(obj[key]);
         }
         return objReduced;
