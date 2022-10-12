@@ -148,17 +148,19 @@ async function registerUser() {
     return await navigator.credentials.create(options);
   }
   async function sendCertificate(credential) {
-    console.log(credential);
-    console.log(Object.getOwnPropertyDescriptors(credential));
-    console.log(Object.getOwnPropertyDescriptor(credential, "authenticatorAttachment"));
-    console.log(Object.getOwnPropertyDescriptor(credential, "id"));
-    console.log(Object.getOwnPropertyDescriptor(credential, "rawId"));
-    console.log(Object.getOwnPropertyDescriptor(credential.response, "attestationObject"));
-    console.log(Object.getOwnPropertyDescriptor(credential.response, "clientDataJSON"));
-    console.log(Object.getOwnPropertyDescriptor(credential, "type"));
+    const credentialObj = {
+      authenticatorAttachment: credential.authenticatorAttachment,
+      id: credential.id,
+      rawId: credential.rawId,
+      response: {
+        attestationObject: credential.response.attestationObject,
+        clientDataJSON: credential.response.clientDataJSON,
+      },
+      type: credential.type,
+    };
     const objRequest = {
       type: "certificate",
-      value: credential,
+      value: credentialObj,
     };
     console.log(objRequest);
     const reducedObj = reduceForJSON(objRequest);
