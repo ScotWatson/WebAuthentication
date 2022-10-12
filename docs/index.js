@@ -148,6 +148,8 @@ async function registerUser() {
     return await navigator.credentials.create(options);
   }
   async function sendCertificate(credential) {
+    console.log(credential);
+    console.log(Object.getOwnPropertyDescriptors(credential));
     const objRequest = {
       type: "certificate",
       value: credential,
