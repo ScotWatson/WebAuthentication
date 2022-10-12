@@ -207,7 +207,7 @@ async function login() {
   async function getChallengeFromServer(response) {
     const text = await response.text();
     const reducedObj = JSON.parse(text);
-    return expandOptionsFromJSON(reducedObj);
+    return expandChallengeFromJSON(reducedObj);
   }
   async function makeAssertion(optionsFromServer) {
     return await navigator.credentials.get({
@@ -283,6 +283,15 @@ function expandOptionsFromJSON(obj) {
   objRet.user.id = expandArrayBufferFromJSON(obj.user.id);
   objRet.pubKeyCredParams = obj.pubKeyCredParams;
   objRet.authenticatorSelection = obj.authenticatorSelection;
+  objRet.timeout = obj.timeout;
+  return objRet;
+}
+
+function expandChallengeFromJSON(obj) {
+  let objRet = {};
+  objRet.challenge = expandArrayBufferFromJSON(obj.challenge);
+  objRet.rp = obj.rp;
+  objRet.allowCredentials = obj.allowCredentials;
   objRet.timeout = obj.timeout;
   return objRet;
 }
