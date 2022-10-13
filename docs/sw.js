@@ -42,32 +42,11 @@ async function simulateAuth(requestBody) {
   return parse(requestBody);
 }
 
-function ResponseOK(objBody) {
-  return new Response(objBody, {
-    status: 200,
-    statusText: "OK",
-    headers: {},
-  });
-}
-
-function ResponseClientError(objBody) {
-  return new Response(objBody, {
-    status: 400,
-    statusText: "Bad Request",
-    headers: {},
-  });
-}
-
-function ResponseServerError(objBody) {
-  return new Response(objBody, {
-    status: 500,
-    statusText: "Internal Server Error",
-    headers: {},
-  });
-}
-
 function unknownRequest() {
-  return ResponseClientError("");
+  return {
+    status: 400,
+    body, "",
+  };
 }
 
 function createOptions(objRequestValue) {
@@ -220,9 +199,14 @@ function self_fetch(e) {
         const requestBody = e.request.text();
         console.log("(sw.js): " + "Request Body: " + requestBody);
         sendMessage("Request Body: " + requestBody);
-        response = await simulateAuth(requestBody);
-        console.log("(sw.js): " + "Response Body: " + response.text());
-        sendMessage("Response Body: " + response.text());
+        const responseInfo = await simulateAuth(requestBody);
+        console.log("(sw.js): " + "Response Body: " + responseInfo.body);
+        sendMessage("Response Body: " + responseInfo.body);
+        response = new Response(responseInfo.body, {
+          status: responseInfo.status,
+          statusText: getStatusText(responseInfo.status),
+          headers: {},
+        });
       default:
         response = await fetch(e.request);
     }
@@ -233,6 +217,19 @@ function self_fetch(e) {
     return response;
   }
   e.respondWith(getResponse());
+}
+
+function getStatusText(status) {
+  switch (status) {
+    case 200:
+      return "OK";
+    case 400:
+      return "Bad Request";
+    case 500:
+      return "Internal Server Error";
+    default:
+      return "";
+  }
 }
 
 function reduceForJSON(obj) {
