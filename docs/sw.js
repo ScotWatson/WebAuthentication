@@ -196,7 +196,7 @@ function self_fetch(e) {
     let response;
     switch (e.request.url) {
       case "https://scotwatson.github.io/WebAuthentication/auth":
-        const requestBody = e.request.text();
+        const requestBody = await e.request.text();
         console.log("(sw.js): " + "Request Body: " + requestBody);
         sendMessage("Request Body: " + requestBody);
         const responseInfo = await simulateAuth(requestBody);
