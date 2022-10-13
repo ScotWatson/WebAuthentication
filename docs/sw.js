@@ -23,7 +23,7 @@ function randomBuffer(length) {
   return retView.buffer;
 }
 
-async function simulateAuth(request) {
+async function simulateAuth(requestBody) {
   function parse(text) {
     const objRequest = JSON.parse(text);
     switch (objRequest.type) {
@@ -39,8 +39,7 @@ async function simulateAuth(request) {
         return unknownRequest();
     }
   }
-  const thisText = await request.text();
-  return parse(thisText);
+  return parse(requestBody);
 }
 
 function ResponseOK(objBody) {
@@ -100,7 +99,10 @@ function createOptions(objRequestValue) {
     },
     "timeout": 60000,
   };
-  return ResponseOK(JSON.stringify(reduceForJSON(optionsFromServer)));
+  return {
+    status: 200,
+    body: JSON.stringify(reduceForJSON(optionsFromServer)),
+  };
 }
 
 function saveCertificate(objRequestValue) {
@@ -108,7 +110,10 @@ function saveCertificate(objRequestValue) {
   const objCertificate = expandCertificateFromJSON(objRequestValue);
   console.log(objCertificate);
   savedCertificates.set(objCertificate.id, objCertificate);
-  return ResponseOK("");
+  return {
+    status: 200,
+    body: "",
+  };
 }
 
 function sendChallenge(objRequestValue) {
@@ -127,55 +132,59 @@ function sendChallenge(objRequestValue) {
     ],
     "userVerification": "discouraged",
   };
-  return ResponseOK(JSON.stringify(reduceForJSON(challengeFromServer)));
+  return {
+    status: 200,
+    body: JSON.stringify(reduceForJSON(challengeFromServer)),
+  };
 }
 
-function testAssertion(objRequestValue) {
-  function getAssertionFromClient() {
-    return expandAssertionFromJSON(JSON.parse(objRequestValue));
+async function testAssertion(objRequestValue) {
+  // getAssertionFromClient
+  const options = expandAssertionFromJSON(JSON.parse(objRequestValue));
+  // getCredential
+  const objCredential = await navigator.credentials.get({
+    publicKey: options,
+  });
+  // parseCredential
+  const response = objCredential.response;
+  const clientExtensionResults = objCredential.getClientExtensionResults();
+  const cData = response.clientDataJSON;
+  const authData = response.authenticatorData;
+  const viewAuthData = new Uint8Array(authData);
+  const sig = response.signature;
+  const encoder = new TextEncoder();
+  const JSONtext = encoder.encode(cData);
+  const C = JSON.parse(JSONtext);
+  if (C.type !== "webauthn.get") {
+    throw new Error("Invalid Type");
   }
-  function getCredential(options) {
-    return navigator.credentials.get({
-      publicKey: options,
-    });
+  const myBase64Decoder = new wifBase64Decoder();
+  if (C.challenge !== myBase64Decoder.decode(options.challenge)) {
+    throw new Error("Invalid Challenge");
   }
-  function parseCredential(objCredential) {
-    const response = objCredential.response;
-    const clientExtensionResults = objCredential.getClientExtensionResults();
-    const cData = response.clientDataJSON;
-    const authData = response.authenticatorData;
-    const viewAuthData = new Uint8Array(authData);
-    const sig = response.signature;
-    const encoder = new TextEncoder();
-    const JSONtext = encoder.encode(cData);
-    const C = JSON.parse(JSONtext);
-    if (C.type !== "webauthn.get") {
-      throw new Error("Invalid Type");
-    }
-    const myBase64Decoder = new wifBase64Decoder();
-    if (C.challenge !== myBase64Decoder.decode(options.challenge)) {
-      throw new Error("Invalid Challenge");
-    }
-    if (C.origin !== origin) {
-      throw new Error("Invalid Origin");
-    }
-    const promiseRpIdHash = self.crypto.subtle.digest("sha-256", pathname).then(function (hash) {
-      const viewHash = new Uint8Array(hash);
-      for (let i = 0; i < 32; ++i) {
-        if (viewHash[i] !== viewAuthData[i]) {
-          return false;
-        }
+  if (C.origin !== origin) {
+    throw new Error("Invalid Origin");
+  }
+  const promiseRpIdHash = self.crypto.subtle.digest("sha-256", pathname).then(function (hash) {
+    const viewHash = new Uint8Array(hash);
+    for (let i = 0; i < 32; ++i) {
+      if (viewHash[i] !== viewAuthData[i]) {
+        return false;
       }
-      return true;
-    });
-    const boolUP = viewAuthData[32] & 0x01;
-    const boolUV = viewAuthData[32] & 0x04;
-    const boolAT = viewAuthData[32] & 0x40;
-    const boolED = viewAuthData[32] & 0x80;
-    const promiseCDataHash = self.crypto.subtle.digest("sha-256", cData);
-    credentialPublicKey
-  }
-  return getAssertionFromClient().then(getCredential).then(parseCredential);
+    }
+    return true;
+  });
+  const boolUP = viewAuthData[32] & 0x01;
+  const boolUV = viewAuthData[32] & 0x04;
+  const boolAT = viewAuthData[32] & 0x40;
+  const boolED = viewAuthData[32] & 0x80;
+  const promiseCDataHash = self.crypto.subtle.digest("sha-256", cData);
+  credentialPublicKey
+
+  return {
+    status: 200,
+    body: "",
+  };
 }
 
 function sendMessage(text) {
@@ -205,19 +214,20 @@ function self_fetch(e) {
   async function getResponse() {
     console.log("(sw.js): " + "Request URL: " + e.request.url);
     sendMessage("Request URL: " + e.request.url);
-    console.log("(sw.js): " + "Request Body: " + e.request.text());
-    sendMessage("Request Body: " + e.request.text());
     let response;
     switch (e.request.url) {
       case "https://scotwatson.github.io/WebAuthentication/auth":
-        response = await simulateAuth(e.request);
+        const requestBody = e.request.text();
+        console.log("(sw.js): " + "Request Body: " + requestBody);
+        sendMessage("Request Body: " + requestBody);
+        response = await simulateAuth(requestBody);
+        console.log("(sw.js): " + "Response Body: " + response.text());
+        sendMessage("Response Body: " + response.text());
       default:
         response = await fetch(e.request);
     }
     console.log("(sw.js): " + "Response Status: " + response.status);
     sendMessage("Response Status: " + response.status);
-    console.log("(sw.js): " + "Response Body: " + response.text());
-    sendMessage("Response Body: " + response.text());
     console.log("(sw.js): End Handling Fetch");
     sendMessage("End Handling Fetch");
     return response;
