@@ -45,7 +45,7 @@ async function simulateAuth(requestBody) {
 function unknownRequest() {
   return {
     status: 400,
-    body, "",
+    body: "",
   };
 }
 
