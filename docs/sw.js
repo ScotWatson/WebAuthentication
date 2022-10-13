@@ -207,8 +207,10 @@ function self_fetch(e) {
           statusText: getStatusText(responseInfo.status),
           headers: {},
         });
+        break;
       default:
         response = await fetch(e.request);
+        break;
     }
     console.log("(sw.js): " + "Response Status: " + response.status);
     sendMessage("Response Status: " + response.status);
